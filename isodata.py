@@ -165,10 +165,29 @@ def isodata(X, K, theta_N, theta_S, theta_c, L=1, max_iter=30, init_k=None,
         centers    : tâm của vòng đó (để vẽ lại quá trình)
         labels     : nhãn của vòng đó (chỉ khi store_labels=True)
         converged  : True nếu dừng do hội tụ (False nếu hết max_iter)
+        final_sse  : SSE tính từ nhãn và tâm thực sự trả về (sau gán nhãn cuối)
     """
     X = np.asarray(X, dtype=np.float64)
+    if X.ndim != 2 or 0 in X.shape or not np.isfinite(X).all():
+        raise ValueError("X phải là ma trận 2D không rỗng, chỉ chứa số hữu hạn")
+    for name, value, minimum in (("K", K, 1), ("max_iter", max_iter, 1),
+                                  ("theta_N", theta_N, 0), ("L", L, 0)):
+        if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)) or value < minimum:
+            raise ValueError(f"{name} phải là số nguyên >= {minimum}")
+    initial_count = K if init_k is None else init_k
+    if (isinstance(initial_count, (bool, np.bool_)) or
+            not isinstance(initial_count, (int, np.integer)) or
+            not 1 <= initial_count <= len(X)):
+        raise ValueError("Số tâm khởi tạo phải là số nguyên từ 1 đến số mẫu")
+    for name, value in (("theta_S", theta_S), ("theta_c", theta_c), ("tol", tol)):
+        if not np.isfinite(value) or value < 0:
+            raise ValueError(f"{name} phải hữu hạn và >= 0")
+    if not np.isfinite(split_k) or not 0 < split_k <= 1:
+        raise ValueError("split_k phải thuộc (0, 1]")
+    if init not in ("random", "kmeans++"):
+        raise ValueError("init phải là random hoặc kmeans++")
     rng = np.random.default_rng(seed)
-    centers = init_centers(X, init_k or K, init, rng)
+    centers = init_centers(X, initial_count, init, rng)
     hist = dict(n_clusters=[], sse=[], shift=[], events=[], centers=[], labels=[], converged=False)
     quiet = 0   # số vòng liên tiếp "yên tĩnh" (không loại/tách/gộp, tâm không dịch)
 
@@ -212,10 +231,12 @@ def isodata(X, K, theta_N, theta_S, theta_c, L=1, max_iter=30, init_k=None,
             print(f"Vòng {it:2d}: Nc={nc:2d} | SSE={sse:14,.1f} | shift={shift:8.4f} | {hist['events'][-1]}")
 
         # 5: kiểm tra hội tụ
-        quiet = quiet + 1 if (n_disc == 0 and n_split == 0 and n_merge == 0 and shift < tol) else 0
+        # Vòng cuối bỏ qua tách/gộp, nên không dùng nó làm bằng chứng hội tụ.
+        quiet = quiet + 1 if (it < max_iter and n_disc == 0 and n_split == 0 and n_merge == 0 and shift <= tol) else 0
         if quiet >= 2:
             hist["converged"] = True
             break
 
     labels, _ = assign(X, centers)
+    hist["final_sse"] = float(((X - centers[labels]) ** 2).sum())
     return labels, centers, hist, it

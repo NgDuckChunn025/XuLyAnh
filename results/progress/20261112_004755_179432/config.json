@@ -1,0 +1,18 @@
+{
+  "arguments": {
+    "images": "images",
+    "out": "results/progress",
+    "size": 200,
+    "k": 5,
+    "init_k": 10,
+    "theta_s": 25,
+    "theta_c": 30,
+    "max_iter": 50,
+    "seed": 0
+  },
+  "python": "3.13.2",
+  "numpy": "2.5.4",
+  "opencv": "5.0.0",
+  "sklearn": "1.9.1",
+  "protocol": "One initialization per algorithm; K-means tol=1e-4, ISODATA tol=0.1; same iteration cap; timings exclude metrics and rendering."
+}

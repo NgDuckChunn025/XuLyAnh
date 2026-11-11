@@ -61,9 +61,9 @@ def main():
 
     # ---- Test 1: tắt tách/gộp -> phải giống K-means ----
     print("\n=== Test 1: ISODATA (tắt tách/gộp) so với K-means ===")
-    l_km, c_km, h_km, _ = kmeans(X, 4, n_init=5)
+    l_km, c_km, h_km, _ = kmeans(X, 4, n_init=1)
     l_iso, c_iso, h_iso, _ = isodata(X, K=4, theta_N=1, theta_S=1e9, theta_c=0.0, max_iter=30)
-    sse_km, sse_iso = h_km["sse"][-1], h_iso["sse"][-1]
+    sse_km, sse_iso = h_km["sse"][-1], h_iso["final_sse"]
     ok = len(c_iso) == 4 and abs(sse_iso - sse_km) / sse_km < 0.01
     ok_all &= ok
     print(f"K-means SSE = {sse_km:.2f} | ISODATA SSE = {sse_iso:.2f} | số cụm = {len(c_iso)} -> {'ĐẠT' if ok else 'KHÔNG ĐẠT'}")
@@ -71,7 +71,7 @@ def main():
     # ---- Test 2: thừa tâm -> gộp ----
     print("\n=== Test 2: khởi tạo 10 tâm, cần gộp về ~4 ===")
     l, c, h, n_it = isodata(X, init_k=10, verbose=True, **common)
-    ok = len(c) == 4
+    ok = len(c) == 4 and any("gộp" in e for e in h["events"])
     ok_all &= ok
     print(f"Số cụm cuối = {len(c)} sau {n_it} vòng -> {'ĐẠT' if ok else 'KHÔNG ĐẠT'}")
     plot_process(X, h, "Test 2: khởi tạo thừa 10 tâm -> GỘP về 4 cụm", "test2_merge.png")
@@ -80,7 +80,7 @@ def main():
     # ---- Test 3: thiếu tâm -> tách ----
     print("\n=== Test 3: khởi tạo 2 tâm, cần tách lên ~4 ===")
     l, c, h, n_it = isodata(X, init_k=2, verbose=True, **common)
-    ok = len(c) == 4
+    ok = len(c) == 4 and any("tách" in e for e in h["events"])
     ok_all &= ok
     print(f"Số cụm cuối = {len(c)} sau {n_it} vòng -> {'ĐẠT' if ok else 'KHÔNG ĐẠT'}")
     plot_process(X, h, "Test 3: khởi tạo thiếu 2 tâm -> TÁCH lên 4 cụm", "test3_split.png")
@@ -91,7 +91,7 @@ def main():
     rng = np.random.default_rng(1)
     Xn = np.vstack([X, rng.uniform(-6, 12, (6, 2)) * np.array([1.0, 1.0])])
     l, c, h, n_it = isodata(Xn, init_k=12, verbose=True, **{**common, "theta_N": 15})
-    ok = len(c) == 4
+    ok = len(c) == 4 and any("loại" in e for e in h["events"])
     ok_all &= ok
     print(f"Số cụm cuối = {len(c)} -> {'ĐẠT' if ok else 'KHÔNG ĐẠT'}")
     plot_process(Xn, h, "Test 4: có nhiễu, cụm < theta_N mẫu bị LOẠI", "test4_discard.png")
@@ -108,7 +108,8 @@ def main():
 
     print("\n" + ("TẤT CẢ ĐẠT" if ok_all else "CÓ TEST KHÔNG ĐẠT - xem log phía trên"))
     print(f"Hình đã lưu trong {OUT}/")
+    return 0 if ok_all else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

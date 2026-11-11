@@ -62,17 +62,18 @@ def main():
         seed=args.seed, verbose=args.verbose)
     t_iso = time.time() - t
     k_final = len(centers_i)
-    sse_iso = hist["sse"][-1]
+    sse_iso = hist["final_sse"]
     seg_iso = features_to_image(labels_i, centers_i, (h, w), args.space)
 
     # --- K-means với K cố định (= K người dùng chọn) ---
     t = time.time()
-    labels_k, centers_k, hk, _ = kmeans(X, args.k, n_init=3, seed=args.seed)
+    labels_k, centers_k, hk, _ = kmeans(X, args.k, n_init=1, max_iter=args.I, seed=args.seed)
     t_km = time.time() - t
     seg_km = features_to_image(labels_k, centers_k, (h, w), args.space)
 
     # --- K-means với K = số cụm ISODATA tìm được (so sánh công bằng cùng số cụm) ---
-    labels_f, centers_f, hf, _ = kmeans(X, k_final, n_init=3, seed=args.seed)
+    labels_f, centers_f, hf, _ = kmeans(X, k_final, n_init=1, max_iter=args.I, seed=args.seed)
+    seg_f = features_to_image(labels_f, centers_f, (h, w), args.space)
 
     print(f"\nISODATA : {k_final} cụm | SSE = {sse_iso:,.0f} | {n_it} vòng "
           f"({'hội tụ' if hist['converged'] else 'hết số vòng'}) | {t_iso:.2f}s")
@@ -84,22 +85,25 @@ def main():
     os.makedirs(out, exist_ok=True)
     name = os.path.splitext(os.path.basename(args.image))[0] if args.image else "synthetic"
     tag = (f"{name}_{args.space}{'_xy' if args.xy else ''}_k{args.k}"
-           f"_s{args.theta_s:g}_c{args.theta_c:g}")
+           f"_s{args.theta_s:g}_c{args.theta_c:g}_n{theta_n}_init{args.init_k or args.k}"
+           f"_L{args.L}_I{args.I}_tol{args.tol:g}_size{args.size}_seed{args.seed}")
     save_image(f"{out}/{tag}_isodata.png", seg_iso)
 
-    fig, ax = plt.subplots(1, 4, figsize=(17, 4))
+    fig, ax = plt.subplots(1, 5, figsize=(21, 4))
     ax[0].imshow(rgb);     ax[0].set_title("Ảnh gốc")
     ax[1].imshow(seg_km);  ax[1].set_title(f"K-means (K={args.k})")
     ax[2].imshow(seg_iso); ax[2].set_title(f"ISODATA ({k_final} cụm)")
-    for a in ax[:3]:
+    ax[3].imshow(seg_f); ax[3].set_title(f"K-means cùng K={k_final}")
+    for a in ax[:4]:
         a.axis("off")
     its = range(1, len(hist["n_clusters"]) + 1)
-    ax[3].plot(its, hist["n_clusters"], "o-")
-    ax[3].axhline(args.k, color="gray", ls="--", label=f"K mong muốn = {args.k}")
-    ax[3].set_xlabel("Vòng lặp"); ax[3].set_ylabel("Số cụm")
-    ax[3].set_title("Số cụm theo vòng lặp"); ax[3].legend(); ax[3].grid(alpha=0.3)
+    ax[4].plot(its, hist["n_clusters"], "o-")
+    ax[4].axhline(args.k, color="gray", ls="--", label=f"K mong muốn = {args.k}")
+    ax[4].set_xlabel("Vòng lặp"); ax[4].set_ylabel("Số cụm")
+    ax[4].set_title("Số cụm theo vòng lặp"); ax[4].legend(); ax[4].grid(alpha=0.3)
     plt.tight_layout()
     plt.savefig(f"{out}/{tag}_compare.png", dpi=110)
+    plt.close(fig)
     print(f"\nĐã lưu: {out}/{tag}_compare.png")
 
 
