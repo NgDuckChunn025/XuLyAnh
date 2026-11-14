@@ -2,6 +2,14 @@
 
 BTL môn Xử lý ảnh và Thị giác máy tính. Cài đặt NumPy, phân cụm pixel bằng màu RGB/Lab/gray và tùy chọn tọa độ XY; so sánh với K-means.
 
+## Demo web — ISODATA Studio
+
+```powershell
+.\venv\Scripts\python.exe -m streamlit run streamlit_app.py --server.address=127.0.0.1 --server.port=8501
+```
+
+Mở **http://127.0.0.1:8501** để tải ảnh, chỉnh tham số, xem ảnh trước/sau, so sánh K-means, xem quá trình và tải PNG/JSON. Có sẵn 5 ảnh mẫu. Xem [hướng dẫn demo web](docs/DEMO_WEB.md) về thao tác, cấu hình và kịch bản trình bày.
+
 ## Chạy trên Windows PowerShell
 
 Chạy từ thư mục gốc dự án. Môi trường `venv` hiện có đủ thư viện; Python toàn hệ thống có thể thiếu scikit-learn.
@@ -25,6 +33,19 @@ Trên máy mới: tạo môi trường bằng `python -m venv venv`, rồi cài 
 - `test_isodata.py`: kiểm thử hồi quy SSE, dữ liệu/tham số lỗi, ảnh đồng màu và trạng thái hội tụ.
 - `test_2d.py`: bốn tình huống trực quan; trả mã lỗi nếu kiểm tra thất bại.
 - [Hướng dẫn báo cáo tiến độ](docs/BAO_CAO_TIEN_DO.md).
+- [Hiểu công thức, ánh xạ code và luyện vấn đáp](docs/HIEU_ISODATA_VA_VAN_DAP.md).
+- [Phân công nhóm 3 người và lịch chuẩn bị](docs/PHAN_CONG_NHOM_3_NGUOI.md).
+
+## Bổ sung để giải thích và khảo sát thuật toán
+
+```powershell
+.\venv\Scripts\python.exe demo_formulas.py
+.\venv\Scripts\python.exe run_sensitivity.py
+```
+
+`demo_formulas.py` kiểm chứng ví dụ bốn điểm bằng chính các hàm tách/gộp; có kiểm tra liên hệ SSE–phương sai và mức tăng SSE khi gộp. `run_sensitivity.py` mặc định chạy ảnh phong cảnh Lab với 7 cấu hình × 3 seed, thay từng tham số so với cấu hình cơ sở; xuất JSON, bảng Markdown và biểu đồ vào thư mục con mới trong `results/sensitivity/`.
+
+Xem [kết quả khảo sát ngày 14/11](results/sensitivity/20261114_002842_746678/RESULTS.md). Khảo sát này chỉ bao phủ một ảnh, chưa phải tối ưu tham số hoặc kết luận tổng quát trên cả bộ dữ liệu.
 
 ## Cách đọc kết quả
 

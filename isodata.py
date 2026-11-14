@@ -16,7 +16,7 @@ Tham số:
     init_k   : số tâm khởi tạo ban đầu (mặc định = K)
     split_k  : hệ số 0 < k <= 1, tâm mới khi tách = tâm cũ ± split_k * sigma_max
 
-Sơ đồ mỗi vòng lặp (theo Duda & Hart, Pattern Classification):
+Sơ đồ biến thể đang cài đặt (nguồn đối chiếu và khác biệt: docs/HIEU_ISODATA_VA_VAN_DAP.md):
     1. assign          : gán mỗi điểm vào tâm gần nhất
     2. discard_small   : loại cụm < theta_N mẫu, gán lại các điểm của nó
     3. update_centers  : tâm = trung bình cụm

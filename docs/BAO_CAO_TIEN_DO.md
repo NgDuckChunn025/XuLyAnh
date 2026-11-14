@@ -2,6 +2,26 @@
 
 Mục tiêu: trình bày khoảng 6–8 phút, chứng minh phần đã làm được, hiểu kết quả và có kế hoạch tiếp theo. Đây là hướng dẫn nội dung để đưa vào slide, chưa phải file PowerPoint. Điều chỉnh theo thời lượng và biểu mẫu giảng viên yêu cầu.
 
+## Cập nhật ngày 14/11 — phần bổ sung cho buổi báo cáo
+
+Đọc [công thức và vấn đáp](HIEU_ISODATA_VA_VAN_DAP.md), [phân công nhóm](PHAN_CONG_NHOM_3_NGUOI.md) và [khảo sát mới](../results/sensitivity/20261114_002842_746678/RESULTS.md).
+
+Đã bổ sung ví dụ tính tay có kiểm chứng bằng code và khảo sát **một ảnh phong cảnh Lab, 7 cấu hình × 3 seed = 21 lượt ISODATA**, 19 lượt hội tụ, 2 lượt hết 50 vòng. Đây là bộ thực nghiệm riêng với bộ 5 ảnh một seed bên dưới; không cộng thành “5 ảnh đã chạy nhiều seed”.
+
+Có thể thêm một slide giữa kết quả ảnh thật và kế hoạch:
+
+| Thay đổi so với cơ sở | Số cụm cuối theo seed 0, 1, 2 | Nhận xét trong phạm vi lần chạy |
+|---|---|---|
+| Cơ sở: theta_S=25, theta_c=30, init_k=10 | 7, 8, 8 | Khởi tạo ảnh hưởng kết quả |
+| Hạ theta_S xuống 15 | 8, 8, 9 | Ngưỡng tách thấp cho số cụm cuối cao hơn ở seed 0 và 2 |
+| Nâng theta_c lên 50 | 5, 5, 4 | Số cụm cuối thấp hơn; seed 2 chưa hội tụ |
+
+Các tham số khác giữ nguyên: K=5, theta_N=60, L=2, tối đa 50 vòng, tol=0,1, không XY. Hình dùng cho slide: [sensitivity.png](../results/sensitivity/20261114_002842_746678/sensitivity.png).
+
+Lời nói: “Em đã khảo sát thêm một ảnh trên ba seed, mỗi lần thay một tham số. Kết quả cho thấy số cụm phụ thuộc cả ngưỡng và khởi tạo. Đây là khảo sát độ nhạy ban đầu, chưa tìm được bộ tham số tối ưu và chưa suy rộng ra tất cả ảnh.”
+
+Khi nói kế hoạch bên dưới, cập nhật thành: **đã bắt đầu nhiều seed trên một ảnh; tiếp theo mở rộng sang các ảnh còn lại và khảo sát các tham số chưa xét như theta_N, L, XY**. Hạn chế “một seed” ở bộ batch cũ vẫn đúng với bộ đó.
+
 ## 1. Kết quả đã kiểm tra
 
 - Đã tự cài đặt ISODATA bằng NumPy, đủ gán nhãn, cập nhật tâm, loại cụm nhỏ, tách và gộp.
